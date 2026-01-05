@@ -1,14 +1,19 @@
 {
+  // 这叫“继承”。相当于直接套用 Vue 官方为你准备好的标准模板，省得你自己写几百行配置。
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
+    // 保证代码在大多数现代浏览器中性能最优且最稳定。 所以选择 ES2020 作为目标。
     "target": "ES2020",
     "useDefineForClassFields": true,
+    // 配合 Vite 6.x 的原生 ESM 模式，实现秒级开发反馈 。
     "module": "ESNext",
+    // 确保你的文件名不会因为大小写问题在服务器上崩溃。
     "forceConsistentCasingInFileNames": true,
 
     /* Linting */
+    // strict 为true的话就表示开启了 所有严格类型检查选项。
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -16,5 +21,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+  //  指定要包含在编译中的文件。
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.d.ts"]
 }
