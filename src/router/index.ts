@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
     // 这样的写法是懒加载 , 实现了 , 按需加载路由组件
     component: () => import("../views/Login.vue"),
   },
-  // 2. 后台主布局 (包含侧边栏的页面都在这里面)
+  // 2. 后台主布局 (包含侧边栏的页面都在这里面)a
   {
     path: "/",
     redirect: "/dashboard",

@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import ElementPlus from "element-plus";
+// 这一行非常重要！如果不加，你的按钮和表格就是光秃秃的 HTML 原生丑样子，没有样式
 import "element-plus/dist/index.css";
 import router from "./router";
 
