@@ -4,6 +4,7 @@ import ElementPlus from "element-plus";
 // 这一行非常重要！如果不加，你的按钮和表格就是光秃秃的 HTML 原生丑样子，没有样式
 import "element-plus/dist/index.css";
 import router from "./router";
+import request from "./utils/request";
 
 import "./style.css";
 import App from "./App.vue";
@@ -17,6 +18,8 @@ app.use(createPinia());
 // 注册 Element Plus
 app.use(ElementPlus);
 app.use(router);
+
+console.log("Axios instance loaded:", request);
 
 // 挂载应用
 app.mount("#app");

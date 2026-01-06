@@ -6,6 +6,8 @@
     <el-aside width="220px" class="sidebar-container">
       <div class="logo">BrewMaster</div>
       <!-- 菜单组件: router 属性开启路由模式 -->
+      <!-- active-text-color 当文字颜色被激活时，文字颜色为黄色 -->
+      <!-- 只要这里写了 router 属性 , 那么 el-menu-item 的 index 属性就会自动被路由路劲替换 , 不再是普通路径了 -->
       <el-menu
         active-text-color="#ffd04b"
         background-color="#545c64"
