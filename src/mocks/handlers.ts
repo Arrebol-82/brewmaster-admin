@@ -28,6 +28,11 @@ export const handlers = [
         username: "admin",
         role: "admin",
         avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=old_boy",
+        // 身份
+        roles: ["admin"],
+        // 权限
+        permissions: ["product:create", "product:delete", "order:view"],
+        //创建商品 删除商品 查看订单
       },
     });
   }),
