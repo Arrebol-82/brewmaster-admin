@@ -6,6 +6,7 @@ import {
 
 import { tokenStorage } from "@/utils/storage";
 import { useAuthStore } from "@/stores/auth";
+import { type Role } from "@/types/user";
 
 const routes: Array<RouteRecordRaw> = [
   // 1. 登录页 (不需要侧边栏，所以单独定义) 不需要二级页面嘛
@@ -25,16 +26,22 @@ const routes: Array<RouteRecordRaw> = [
         path: "dashboard",
         name: "Dashboard",
         component: () => import("../views/Dashboard.vue"),
+        // 所有人都能访问仪表盘
+        meta: { title: "仪表盘" },
       },
       {
         path: "products",
         name: "Products",
         component: () => import("../views/products/ProductList.vue"),
+        // 只有 admin 才能访问产品管理
+        meta: { title: "产品管理", roles: ["admin"] },
       },
       {
         path: "orders",
         name: "Orders",
         component: () => import("../views/orders/OrderList.vue"),
+        // 都能访问订单管理
+        meta: { title: "订单管理", roles: ["admin", "staff"] },
       },
     ],
   },
@@ -78,13 +85,30 @@ router.beforeEach(async (to, from, next) => {
         try {
           console.log("🔄 页面刷新，正在重新获取用户信息...");
           await authStore.fetchUser(); // 补发请求,恢复数据
-          next();
+          // ❌ 重点!!!!：这里千万不要写 next()！！！
+          // ❌ 删掉这里的 next()，让代码继续往下走去检查权限!!!
+          //  Vue Router 的机制是：一次路由导航（Navigation），只能接受一次状态变更。
         } catch (error) {
           // 如果 Token 过期了或获取失败
           console.log("❌ 用户信息获取失败:", error);
           authStore.logout();
           next("/login");
+          return;
         }
+      }
+      // 获取该页面要求的角色列表 (从 meta.roles 里拿) 上面路由已经配置好了
+      // as string[] 是告诉 TS：我确定这里面存的是字符串数组 | undefined 是告诉 TS：我可能没有这个角色列表
+      const requiredRoles = to.meta.roles as string[] | undefined;
+      if (
+        // 如果该页面有要求角色列表 , 并且用户没有这个角色列表 , 那么就踢回登录页
+        requiredRoles &&
+        !requiredRoles.some((role) => authStore.roles.includes(role as Role))
+      ) {
+        console.warn(
+          `🛑 权限不足: 当前角色 ${authStore.roles} 试图访问 ${to.path}`
+        );
+        next("/403");
+        return;
       } else {
         next();
       }
