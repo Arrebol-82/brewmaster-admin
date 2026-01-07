@@ -1,13 +1,13 @@
 <template>
   <div class="not-found-container">
     <el-result
-      icon="warning"
-      title="404"
-      sub-title="哎呦 , 你访问的页面好像飞去火星了 🪐"
+      icon="error"
+      title="403"
+      sub-title="哎呦 , 你没有权限访问这个页面 🚫"
     >
       <template #extra>
         <el-button type="primary" @click="$router.push('/')"
-          >回到首页</el-button
+          >返回首页</el-button
         >
       </template>
     </el-result>
@@ -15,6 +15,7 @@
 </template>
 <style scoped>
 .not-found-container {
+  width: 100%;
   height: 100vh;
   display: flex;
   justify-content: center; /* 水平居中 */

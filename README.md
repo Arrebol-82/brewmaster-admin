@@ -1,5 +1,43 @@
-# Vue 3 + TypeScript + Vite
+# ☕ BrewMaster Admin (咖啡店后台管理系统)
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+基于 Vue 3 + TypeScript + Vite + Element Plus 的现代化后台管理系统。
+本项目演示了从零构建企业级中后台的全过程，包含完整的鉴权、路由、Mock 数据流。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## ✨ 功能特性 (Week 1 完成)
+
+- **🛠 技术栈**: Vue 3 (Script Setup), TypeScript, Vite, Pinia, Vue Router
+- **🎨 UI 框架**: Element Plus
+- **🔐 权限管理**: 完善的登录/退出流程，路由守卫拦截 (Token 校验)
+- **📡 网络请求**: Axios 二次封装 (自动携带 Token / 全局错误拦截 / 401 处理)
+- **🎭 数据 Mock**: 集成 MSW (Mock Service Worker)，脱离后端独立开发
+- **🧭 路由体系**: 嵌套路由 Layout 布局，404/403 页面处理
+
+## 🚀 快速开始
+
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/你的用户名/brewmaster-admin.git
+cd brewmaster-admin
+2. 安装依赖
+npm install
+3. 启动开发服务器
+npm run dev
+4. 模拟账号 (Mock)
+本项目内置 MSW，无需后端即可登录：
+• 账号: admin (或任意字符)
+• 密码: 123456 (或任意字符)
+📂 目录结构
+src/
+├── api/          # API 接口定义
+├── assets/       # 静态资源
+├── components/   # 公共业务组件
+├── layouts/      # 布局组件 (Sidebar/Header)
+├── mocks/        # MSW Mock 数据定义 (假后端)
+├── router/       # 路由与守卫配置
+├── stores/       # Pinia 状态管理 (Auth等)
+├── utils/        # 工具库 (Axios/Storage)
+└── views/        # 页面文件 (Login/Dashboard/Products...)
+
+---
+```
