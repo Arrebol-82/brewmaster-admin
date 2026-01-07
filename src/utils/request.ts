@@ -43,11 +43,12 @@ service.interceptors.request.use(
 // 3.响应式拦截器 (Response Interceptor)
 // interceptors.response 是 Axios 内置的钩子 (拦截服务器返回的数据)
 // response: AxiosResponse<ApiResponse> === 属性名: Array<any>
+// 所有返回的请求都会经过这个拦截器
 service.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     // 2xx 范围内的状态码都会触发函数
     const res = response.data;
-    if (res.code !== 0) {
+    if (res.code !== 200) {
       // 如果code不对 , 说明业务代码出错了 , 弹出提示
       ElMessage.error(res.message || "系统繁忙 , 请稍后再试");
       // 特殊情况: 如果code 是 401 (未登录或过期)
