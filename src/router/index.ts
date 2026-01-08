@@ -7,6 +7,7 @@ import {
 import { tokenStorage } from "@/utils/storage";
 import { useAuthStore } from "@/stores/auth";
 import { type Role } from "@/types/user";
+import { ElMessage } from "element-plus";
 
 const routes: Array<RouteRecordRaw> = [
   // 1. 登录页 (不需要侧边栏，所以单独定义) 不需要二级页面嘛
@@ -91,6 +92,7 @@ router.beforeEach(async (to, from, next) => {
         } catch (error) {
           // 如果 Token 过期了或获取失败
           console.log("❌ 用户信息获取失败:", error);
+          ElMessage.error("身份已过期，请重新登录");
           authStore.logout();
           next("/login");
           return;
