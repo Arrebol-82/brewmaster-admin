@@ -26,10 +26,10 @@ export const handlers = [
       data: {
         id: 1,
         username: "admin",
-        role: "staff",
+        role: "admin",
         avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=old_boy",
         // 身份
-        roles: ["staff"],
+        roles: ["admin"],
         // 权限
         permissions: ["product:create", "product:delete", "order:view"],
         //创建商品 删除商品 查看订单

@@ -54,7 +54,6 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     tokenStorage.clear();
     // 这里可以加一个路由跳转 , 跳转到登录页
-    window.location.href = "/login";
   };
   return {
     roles,
