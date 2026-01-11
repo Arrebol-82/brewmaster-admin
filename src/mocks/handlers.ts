@@ -10,6 +10,16 @@ const allProducts = Array.from({ length: 25 }).map((_, index) => ({
   stock: 10 + index, // 库存
   createTime: "2026-01-08",
 }));
+const allOrders = Array.from({ length: 25 }).map((_, index) => {
+  const statusList = ["pending", "paid", "shipped", "completed", "cancelled"];
+  return {
+    id: index + 1,
+    orderNo: `ORDER${20260000 + index}`,
+    totalAmount: Math.floor(Math.random() * 1000) + 1000,
+    status: statusList[index % 5],
+    createTime: "2026-01-11 15:18:15",
+  };
+});
 export const handlers = [
   // 1. 拦截 POST /api/login 请求
   http.post("/api/login", async ({ request }) => {
@@ -110,13 +120,11 @@ export const handlers = [
     const pageSize = Number(url.searchParams.get("pageSize")) || 10;
     // 搜索关键词
     const keyword = url.searchParams.get("keyword") || "";
-    console.log(keyword);
 
     // 2. 模拟搜索 (简单的模糊匹配)
     let filteredList = allProducts;
     // 如果搜索关键词不为空 , 则过滤掉不符合关键词的商品
     if (keyword) {
-      console.log(keyword);
       filteredList = filteredList.filter((item) => item.name.includes(keyword));
     }
 
@@ -129,6 +137,54 @@ export const handlers = [
     const end = start + pageSize;
     // 这里的pageList 是咖啡的数量 , 记住是咖啡的数量
     const pageList = filteredList.slice(start, end);
+
+    //4. 返回标准分页结构
+    return HttpResponse.json({
+      code: 200,
+      message: "success",
+      data: {
+        list: pageList, // 返回的是需要展示在页面上的咖啡 , 不是咖啡的总数量
+        total: total, // 告诉前端总共有多少条咖啡
+      },
+    });
+  }),
+  http.get("/api/orders", async ({ request }) => {
+    // 模拟网络延迟 500ms 让你看到 loading 效果
+    await delay(1000);
+
+    const url = new URL(request.url); // 获取请求URL 指的是这个请求要飞往哪里。
+    // new URL 这个对象有一个 searchParams 属性 , 专门用来装 ? 后面的参数 并且把我们整理好了
+    // url.searchParams 专门用来装 ? 后面的参数上面说的
+    // 页码
+    const page = Number(url.searchParams.get("page")) || 1;
+    // 每页条数
+    const pageSize = Number(url.searchParams.get("pageSize")) || 10;
+    // 搜索关键词
+    const keyword = url.searchParams.get("keyword") || "";
+
+    // 状态匹配
+    const status = url.searchParams.get("status") || "";
+
+    // 2. 模拟搜索 (简单的模糊匹配)
+    let resultList = allOrders;
+
+    // 模糊关键词搜索
+    if (keyword) {
+      resultList = resultList.filter((item) => item.orderNo.includes(keyword));
+    } else if (status) {
+      // 过滤
+      resultList = resultList.filter((item) => item.status === status);
+    }
+
+    const total = resultList.length;
+
+    // 3. 模拟分页 (Slice 切割数组)
+    // 计算起始商品索引
+    const start = (page - 1) * pageSize;
+    // 计算结束商品索引
+    const end = start + pageSize;
+    // 这里的pageList 是咖啡的数量 , 记住是咖啡的数量
+    const pageList = resultList.slice(start, end);
 
     //4. 返回标准分页结构
     return HttpResponse.json({

@@ -114,7 +114,6 @@ const queryParams = reactive<ProductQuery>({
 //核心逻辑: 加载数据
 // 这里要搞清楚一个概念 , ELement-plus会把我计算需要多少个页面显示 , 所以我们只要传每页显示多少 , 总共多少即可
 const loadData = async () => {
-  console.log("看我", queryParams);
   loading.value = true;
   try {
     // 调用 API
