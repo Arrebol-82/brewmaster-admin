@@ -19,15 +19,16 @@ export function getProductList(params: ProductQuery) {
 
 // 1. 新增商品
 export function createProduct(payload: ProductCreateDTO) {
-  return request.post<void>("/api/products", payload);
+  return request.post<void>("/products", payload);
 }
 
 // 2. 编辑商品 (PUT)
 // 需要id定位, payload 是更新的数据
 export function updateProduct(id: number, payload: ProductUpdateDTO) {
-  return request.put<void>(`/api/products/${id}`, payload);
+  return request.put<void>(`/products/${id}`, payload);
 }
 
+// 3. 删除商品
 export function deleteProduct(id: number) {
-  return request.delete<void>(`/api/products/${id}`);
+  return request.delete<void>(`/products/${id}`);
 }

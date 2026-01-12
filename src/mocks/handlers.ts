@@ -1,8 +1,9 @@
 // http 是拦截器和监视器 , 用来拦截和监视URL
 // HttpResponse 用来模拟返回数据(响应体);
 import { http, HttpResponse, delay } from "msw";
+import type { Product } from "@/types/product";
 // map 创建出来的数组会把原来的给替换掉
-const allProducts = Array.from({ length: 25 }).map((_, index) => ({
+let dbProducts: Product[] = Array.from({ length: 25 }).map((_, index) => ({
   id: index + 1,
   name: `香草拿铁咖啡 ${index + 1}号`,
   price: 2800 + index * 100, // 2800分 = 28元
@@ -10,7 +11,7 @@ const allProducts = Array.from({ length: 25 }).map((_, index) => ({
   stock: 10 + index, // 库存
   createTime: "2026-01-08",
 }));
-const allOrders = Array.from({ length: 55 }).map((_, index) => {
+let allOrders = Array.from({ length: 55 }).map((_, index) => {
   const statusList = ["pending", "paid", "shipped", "completed", "cancelled"];
   return {
     id: index + 1,
@@ -113,6 +114,8 @@ export const handlers = [
     // 如果 Token 既不是 admin 也不是 staff
     return new HttpResponse(null, { status: 401 }); // 跟上面是同理的
   }),
+
+  // products 商品管理 -----------------------------------
   http.get("/api/products", async ({ request }) => {
     // 模拟网络延迟 500ms 让你看到 loading 效果
     await delay(1000);
@@ -130,7 +133,7 @@ export const handlers = [
     const status = url.searchParams.get("status") || "";
 
     // 2. 模拟搜索 (简单的模糊匹配)
-    let filteredList = allProducts;
+    let filteredList = dbProducts;
     // 如果搜索关键词不为空 , 则过滤掉不符合关键词的商品
     if (keyword) {
       filteredList = filteredList.filter((item) => item.name.includes(keyword));
@@ -159,6 +162,71 @@ export const handlers = [
       },
     });
   }),
+
+  // 新增商品
+  http.post("/api/products", async ({ request }) => {
+    await delay(500); // 模拟网络延迟
+    // 获取前端传过来的 JSON 数据
+    // 注意：request.json() 返回的是 Promise
+    const newProduct = (await request.json()) as any;
+    console.log("开开我", newProduct);
+
+    // 模拟后端生成 id 和 创建时间
+    const productObj: Product = {
+      id: dbProducts.length > 0 ? dbProducts[dbProducts.length - 1]!.id + 1 : 1, // 自增ID
+      createTime: new Date().toLocaleString(),
+      ...newProduct, // 展开前端传来的 name, price 等字段
+    };
+
+    // 推入内存数组
+    dbProducts.unshift(productObj); // 跟push的区别就是一个是放在最前面，一个是放在最后面
+    return HttpResponse.json({
+      code: 200,
+      message: "创建成功",
+      data: null,
+    });
+  }),
+
+  //2. 编辑商品 (PUT)
+  http.put("/api/products/:id", async ({ params, request }) => {
+    await delay(500); // 模拟网络延迟
+    const id = Number(params.id);
+    const updateData = (await request.json()) as any;
+
+    //在数组里面找到这个商品
+    const index = dbProducts.findIndex((p) => p.id === id);
+    // findIndex 会去找到商品的 id 是否和 id 相等 , 如果相等就返回索引 , 如果不相等就返回 -1
+    if (index !== -1) {
+      // 更新数据 (合并旧数据和新数据)
+      dbProducts[index] = { ...dbProducts[index], ...updateData };
+
+      return HttpResponse.json({
+        code: 200,
+        message: "更新成功",
+        data: null,
+      });
+    }
+    return HttpResponse.json(
+      { code: 404, message: "商品不存在", data: null }, // 给前端用的
+      { status: 404 } //给axios和浏览器用的
+    );
+  }),
+  //3. 删除商品
+  http.delete("/api/products/:id", async ({ params }) => {
+    await delay(500); // 模拟网络延迟
+    const id = Number(params.id);
+
+    // 过滤掉这个 ID 的商品
+    // filter 的逻辑不是“找出要删的”，而是“保留想要的”。
+    dbProducts = dbProducts.filter((p) => p.id !== id);
+    return HttpResponse.json({
+      code: 200,
+      message: "删除成功",
+      data: null,
+    });
+  }),
+
+  // orders 订单 -----------------------------------
   http.get("/api/orders", async ({ request }) => {
     // 模拟网络延迟 500ms 让你看到 loading 效果
     await delay(1000);
