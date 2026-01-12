@@ -26,21 +26,21 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "dashboard",
         name: "Dashboard",
-        component: () => import("../views/Dashboard.vue"),
+        component: () => import("@/views/Dashboard.vue"),
         // 所有人都能访问仪表盘
         meta: { title: "仪表盘" },
       },
       {
         path: "products",
         name: "Products",
-        component: () => import("../views/products/ProductList.vue"),
+        component: () => import("@/views/products/ProductList.vue"),
         // 只有 admin 才能访问产品管理
         meta: { title: "产品管理", roles: ["admin"] },
       },
       {
         path: "orders",
         name: "Orders",
-        component: () => import("../views/orders/OrderList.vue"),
+        component: () => import("@/views/orders/OrderList.vue"),
         // 都能访问订单管理
         meta: { title: "订单管理", roles: ["admin", "staff"] },
       },

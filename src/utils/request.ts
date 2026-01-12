@@ -8,7 +8,7 @@ import { ElMessage } from "element-plus";
 // 导入 token 存储工具 (浏览器本地存储)
 import { tokenStorage } from "./storage";
 // 导入 API 响应类型 (规则说明书)
-import type { ApiResponse } from "../types/api";
+import type { ApiResponse } from "@/types/api";
 
 // 1. 创建 axios 实例
 // axios.create 创建自定义路由

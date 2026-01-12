@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import service from "../utils/request";
-import { tokenStorage } from "../utils/storage";
-import type { ApiResponse } from "../types/api";
+import service from "@/utils/request";
+import { tokenStorage } from "@/utils/storage";
+import type { ApiResponse } from "@/types/api";
 import type { User, Role } from "@/types/user";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -55,11 +55,17 @@ export const useAuthStore = defineStore("auth", () => {
     tokenStorage.clear();
     // 这里可以加一个路由跳转 , 跳转到登录页
   };
+
+  const userRole = computed(() => {
+    if (!token.value) return "没拿到";
+    return token.value.split("-")[0];
+  });
   return {
     roles,
     token,
     user,
     permissions,
+    userRole,
     hasPerm,
     hasRole,
     login,

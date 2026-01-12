@@ -10,7 +10,7 @@ const allProducts = Array.from({ length: 25 }).map((_, index) => ({
   stock: 10 + index, // 库存
   createTime: "2026-01-08",
 }));
-const allOrders = Array.from({ length: 25 }).map((_, index) => {
+const allOrders = Array.from({ length: 55 }).map((_, index) => {
   const statusList = ["pending", "paid", "shipped", "completed", "cancelled"];
   return {
     id: index + 1,

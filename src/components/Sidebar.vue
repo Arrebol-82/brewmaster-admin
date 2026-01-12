@@ -53,7 +53,7 @@ const visibleMenus = computed(() => {
 const activeMenu = computed(() => route.path); // 当前激活的菜单项
 </script>
 <template>
-  <el-aside width="200px" class="sidebar-container">
+  <el-aside width="230px" class="sidebar-container">
     <el-menu
       :default-active="activeMenu"
       router
