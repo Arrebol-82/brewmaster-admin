@@ -43,9 +43,9 @@
       <!-- 头部操作区 -->
       <template #header>
         <div class="card-header">
-          <span>商品列表</span>
+          <span>订单管理</span>
           <!-- 昨天的权限按钮 -->
-          <el-button v-if="authStore.hasPerm('product:create')" type="primary">
+          <el-button v-if="authStore.hasPerm('order:create')" type="primary">
             ➕ 新增商品
           </el-button>
         </div>
@@ -71,11 +71,11 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" widht="180" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default>
             <el-button link type="primary" size="small">🖊️ 编辑</el-button>
             <el-button
-              v-if="authStore.hasPerm('product:delete')"
+              v-if="authStore.hasPerm('order:delete')"
               link
               type="danger"
               size="small"

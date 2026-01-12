@@ -81,7 +81,13 @@ export const handlers = [
           // 身份
           roles: ["admin"],
           // 权限
-          permissions: ["product:create", "product:edit", "product:delete"],
+          permissions: [
+            "product:create",
+            "product:edit",
+            "product:delete",
+            "order:create",
+            "order:delete",
+          ],
           //创建商品 编辑商品 删除商品
         },
       });
@@ -121,11 +127,16 @@ export const handlers = [
     // 搜索关键词
     const keyword = url.searchParams.get("keyword") || "";
 
+    const status = url.searchParams.get("status") || "";
+
     // 2. 模拟搜索 (简单的模糊匹配)
     let filteredList = allProducts;
     // 如果搜索关键词不为空 , 则过滤掉不符合关键词的商品
     if (keyword) {
       filteredList = filteredList.filter((item) => item.name.includes(keyword));
+    } else if (status) {
+      // 过滤
+      filteredList = filteredList.filter((item) => item.status === status);
     }
 
     const total = filteredList.length;

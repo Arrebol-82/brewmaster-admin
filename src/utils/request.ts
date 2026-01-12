@@ -55,7 +55,7 @@ service.interceptors.response.use(
       // 我可以你在这里做自动退出逻辑 (day7 会完善)
       if (res.code === 401) {
         tokenStorage.clear();
-        window.location.href = "/login"; //强制调回登录页;
+        return Promise.reject(new Error("401"));
       }
       return Promise.reject(new Error(res.message || "Error"));
     } else {
@@ -72,7 +72,6 @@ service.interceptors.response.use(
     // 这里的401 是 状态码 , 不是 code :属于协议型错误了
     if (error.response?.status === 401) {
       tokenStorage.clear();
-      window.location.href = "/login"; //强制调回登录页;
     }
     return Promise.reject(error);
   }

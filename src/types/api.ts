@@ -1,6 +1,6 @@
 // 写一个泛型接口
 export interface ApiResponse<T = any> {
-  // 业务状态码, 比如 0 代表成功, -1 代表失败
+  // 业务状态码
   code: number;
   // 给后端的提示信息, 比如 "登录成功"
   message: string;

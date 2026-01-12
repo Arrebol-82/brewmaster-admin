@@ -67,7 +67,7 @@ const router = createRouter({
   routes,
 });
 
-const whiteList = ["/login", "/404", "/403"];
+const whiteList = ["/login", "/403"];
 
 // 全局前置守卫 当用户访问路由的时候，会先执行这个函数
 router.beforeEach(async (to, from, next) => {

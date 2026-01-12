@@ -14,6 +14,23 @@
             @clear="handleSearch"
           />
         </el-form-item>
+        <el-form-item label="状态">
+          <!-- 状态下拉框 -->
+          <el-select
+            v-model="queryParams.status"
+            style="width: 150px"
+            clearable
+            @change="handleSearch"
+            placeholder="请选择状态"
+          >
+            <el-option
+              v-for="item in statusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">🔍 搜索</el-button>
           <el-button @click="resetSearch">🔄 重置</el-button>
@@ -59,7 +76,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" widht="180" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default>
             <el-button link type="primary" size="small">🖊️ 编辑</el-button>
             <el-button
@@ -109,7 +126,14 @@ const queryParams = reactive<ProductQuery>({
   page: 1,
   pageSize: 10,
   keyword: "",
+  status: "",
 });
+
+const statusOptions = [
+  { label: "全部", value: "" },
+  { label: "在售", value: "on_sale" },
+  { label: "售罄", value: "sold_out" },
+];
 
 //核心逻辑: 加载数据
 // 这里要搞清楚一个概念 , ELement-plus会把我计算需要多少个页面显示 , 所以我们只要传每页显示多少 , 总共多少即可
