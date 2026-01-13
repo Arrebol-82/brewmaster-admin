@@ -203,7 +203,7 @@ export const handlers = [
       return HttpResponse.json({
         code: 200,
         message: "更新成功",
-        data: null,
+        data: dbProducts[index],
       });
     }
     return HttpResponse.json(

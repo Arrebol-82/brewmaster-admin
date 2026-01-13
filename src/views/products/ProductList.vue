@@ -1,127 +1,152 @@
 <template>
-  <div class="product-list-container">
-    <!-- 搜索栏 (Card 布局) -->
-    <el-card class="search-card">
-      <el-form :inline="true" :model="queryParams" @submit.prevent>
-        <!-- :inline 表示水平排列  :model 表示关了某个数据-->
-        <el-form-item label="商品名称">
-          <!-- clear 一件清空按钮 @clear 和 clear 是相辅相成的-->
+  <div class="product-list">
+    <!-- 1. 顶部操作区 (保留了你的搜索和筛选!) -->
+    <el-card class="box-card">
+      <div class="header-actions">
+        <!-- 左侧：搜索和筛选 -->
+        <div class="filter-container">
+          <!-- 关键词搜索 -->
           <el-input
             v-model="queryParams.keyword"
             placeholder="请输入关键词"
             clearable
+            style="width: 200px; margin-right: 10px"
             @keyup.enter="handleSearch"
             @clear="handleSearch"
-          />
-        </el-form-item>
-        <el-form-item label="状态">
-          <!-- 状态下拉框 -->
+          >
+            <template #append>
+              <el-button @click="handleSearch">
+                <el-icon><Search /></el-icon>
+              </el-button>
+            </template>
+          </el-input>
+
+          <!-- 状态筛选 -->
           <el-select
             v-model="queryParams.status"
-            style="width: 150px"
-            clearable
-            @change="handleSearch"
             placeholder="请选择状态"
+            clearable
+            style="width: 150px; margin-right: 10px"
+            @change="handleSearch"
           >
-            <el-option
-              v-for="item in statusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <!-- 你的状态选项 -->
+            <el-option label="全部" value="" />
+            <el-option label="在售" value="on_sale" />
+            <el-option label="售罄" value="sold_out" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">🔍 搜索</el-button>
-          <el-button @click="resetSearch">🔄 重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <!-- 2. 表格区域 -->
-    <el-card class="table-card">
-      <!-- 头部操作区 -->
-      <template #header>
-        <div class="card-header">
-          <span>商品列表</span>
-          <!-- 昨天的权限按钮 -->
-          <el-button v-if="authStore.hasPerm('product:create')" type="primary">
-            ➕ 新增商品
-          </el-button>
         </div>
-      </template>
+        <!-- 右侧：新增按钮 (保留权限控制) -->
+        <!-- 注意: 如果你之前用了 v-if='authStore.has....' 保留 -->
+        <el-button
+          v-if="authStore.hasPerm('product:create')"
+          type="primary"
+          @click="handleCreate"
+        >
+          <el-icon style="margin-right: 5px"><Plus /></el-icon>
+          新增商品
+        </el-button>
+      </div>
 
-      <!-- 核心表格 v-loading 加载状态 -->
-      <!-- border 就是嘉盛边框和线 -->
+      <!-- 表格区域 -->
       <el-table
         v-loading="loading"
-        elemnt-loading-text="加载中..."
+        element-loading-text="拼命加载中..."
         :data="tableData"
         border
-        style="width: 100%"
+        style="width: 100%; margin-top: 20px"
       >
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="商品名称" width="150" />
-        <el-table-column>
-          <template #default="{ row }">
-            <!-- 格式化价格: 分转元 -->
-            ¥ {{ (row.price / 100).toFixed(2) }}
+        <el-table-column prop="name" label="商品名称" />
+        <el-table-column label="价格" width="120">
+          <template #default="scope">
+            ¥{{ (scope.row.price / 100).toFixed(2) }}
           </template>
         </el-table-column>
-
+        <el-table-column prop="stock" label="库存" width="100" />
         <el-table-column label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'on_sale' ? 'success' : 'danger'">
-              {{ row.status === "on_sale" ? "在售" : "售罄" }}
+          <template #default="scope">
+            <!-- 状态显示逻辑 -->
+            <el-tag
+              :type="scope.row.status === 'on_sale' ? 'success' : 'danger'"
+            >
+              {{ scope.row.status === "on_sale" ? "在售" : "售罄" }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default>
-            <el-button link type="primary" size="small">🖊️ 编辑</el-button>
+
+        <!-- 操作列 -->
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="scope">
+            <el-button
+              v-if="authStore.hasPerm('product:edit')"
+              size="small"
+              type="primary"
+              link
+              @click="handleEdit(scope.row)"
+            >
+              <el-icon><Edit /></el-icon>
+              编辑
+            </el-button>
+            <!-- 删除按钮 (保留权限控制) -->
             <el-button
               v-if="authStore.hasPerm('product:delete')"
-              link
-              type="danger"
               size="small"
-              >删除</el-button
+              type="danger"
+              link
+              @click="handleDelete(scope.row)"
             >
+              <el-icon><Delete /></el-icon> 删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- 分页区域 -->
-      <div class="pagination-area">
+      <!-- 3. 分页区域 (保留你的分页逻辑) -->
+      <div
+        class="pagination-container"
+        style="margin-top: 20px; display: flex; justify-content: flex-end"
+      >
         <el-pagination
           v-model:current-page="queryParams.page"
           v-model:page-size="queryParams.pageSize"
           :total="total"
-          :page-sizes="[2, 6, 14]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="loadData"
+          :page-sizes="[10, 15, 20]"
+          @size-change="handleSearch"
           @current-change="loadData"
         />
-        <!-- total 显示总数 -->
-        <!-- total 共... sizes 10条一页 prev 显示 pager：显示数字页码 1, 2, 3...。 next：显示“下一页”按钮 >。jumper：显示“前往第几页”的输入框。 -->
       </div>
     </el-card>
+    <!-- 4. 融合核心: 弹窗组件  -->
+    <ProductFormDialog
+      v-model="dialogVisible"
+      :mode="dialogMode"
+      :current-id="currentRow?.id"
+      :initial-data="currentRow"
+      @success="loadData"
+    />
   </div>
 </template>
 
-<script setup lang="ts">
-import { reactive, ref, onMounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import { getProductList } from "@/api/products";
+<script lang="ts" setup>
+import { ref, reactive, onMounted } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Search, Plus, Edit, Delete } from "@element-plus/icons-vue";
+// 引入API 和 类型
+import { getProductList, deleteProduct } from "@/api/products";
 import type { Product, ProductQuery } from "@/types/product";
-
+//引入day3 写的组件
+import ProductFormDialog from "./components/ProductFormDialog.vue";
+// 如果你有 authStore 可以保留
+import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore();
 
-// 状态定义
+// 1. 搜索与列表数据
 const loading = ref(false);
 const tableData = ref<Product[]>([]);
 const total = ref(0);
 
-// 查询参数 (响应式对象)
+// 你的核心
 const queryParams = reactive<ProductQuery>({
   page: 1,
   pageSize: 10,
@@ -129,66 +154,82 @@ const queryParams = reactive<ProductQuery>({
   status: "",
 });
 
-const statusOptions = [
-  { label: "全部", value: "" },
-  { label: "在售", value: "on_sale" },
-  { label: "售罄", value: "sold_out" },
-];
-
-//核心逻辑: 加载数据
-// 这里要搞清楚一个概念 , ELement-plus会把我计算需要多少个页面显示 , 所以我们只要传每页显示多少 , 总共多少即可
 const loadData = async () => {
   loading.value = true;
   try {
-    // 调用 API
     const res = await getProductList(queryParams);
-    // 根据你的axios封装 , 这里可能直接是 data , 或者是 res.data
-    // 假设 request.ts 里已经解包了 code/message
-    tableData.value = res.data.list; // 一页显示多少杯咖啡
-    total.value = res.data.total; // 总数
+    tableData.value = res.data.list;
+    total.value = res.data.total;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   } finally {
     loading.value = false;
   }
 };
 
-// 搜索
+// 搜索 / 重置 (每次搜索都要重置)
 const handleSearch = () => {
-  queryParams.page = 1; // 搜索时重置回第一页
+  queryParams.page = 1;
   loadData();
 };
 
-// 重置
-const resetSearch = () => {
-  queryParams.keyword = "";
-  handleSearch();
+// 2. 弹窗控制 (新增和编辑)
+const dialogVisible = ref(false);
+const dialogMode = ref<"create" | "edit">("create");
+const currentRow = ref<Product | undefined>(undefined);
+
+// 点击新增
+const handleCreate = () => {
+  dialogMode.value = "create";
+  currentRow.value = undefined;
+  dialogVisible.value = true;
 };
 
-// 页面挂载时加载
+// 点击编辑
+const handleEdit = (row: Product) => {
+  dialogMode.value = "edit";
+  currentRow.value = row;
+  dialogVisible.value = true;
+};
+
+// 删除逻辑 (day5)
+const handleDelete = async (row: Product) => {
+  try {
+    await ElMessageBox.confirm(`确定要删除商品 ${row.name} 吗?`, "删了就没咯", {
+      confirmButtonText: "确定咯",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+    await deleteProduct(row.id);
+    ElMessage.success("删除成功");
+
+    // 细节优化: 如果当前页只有一条数据且不是第一页 , 删完后自动往前一页查询
+    if (tableData.value.length === 1 && queryParams.page > 1) {
+      queryParams.page--;
+    }
+    loadData();
+  } catch (error) {
+    console.error(error);
+    // 取消删除
+  } finally {
+    dialogVisible.value = false;
+  }
+};
+
 onMounted(() => {
   loadData();
 });
 </script>
 
 <style scoped>
-.product-list-container {
-  padding: 20px;
-}
-
-.search-card {
-  margin-bottom: 20px;
-}
-
-.card-header {
+.header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
-
-.pagination-area {
-  margin-top: 20px;
+.filter-container {
   display: flex;
-  justify-content: center;
+  align-items: center;
 }
 </style>
