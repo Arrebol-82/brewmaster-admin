@@ -129,49 +129,28 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Plus, Edit, Delete } from "@element-plus/icons-vue";
 // 引入API 和 类型
 import { getProductList, deleteProduct } from "@/api/products";
-import type { Product, ProductQuery } from "@/types/product";
+import type { Product } from "@/types/product";
 //引入day3 写的组件
 import ProductFormDialog from "./components/ProductFormDialog.vue";
 // 如果你有 authStore 可以保留
 import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore();
+import { useTable } from "@/composables/useTable";
 
-// 1. 搜索与列表数据
-const loading = ref(false);
-const tableData = ref<Product[]>([]);
-const total = ref(0);
-
-// 你的核心
-const queryParams = reactive<ProductQuery>({
-  page: 1,
-  pageSize: 10,
-  keyword: "",
-  status: "",
-});
-
-const loadData = async () => {
-  loading.value = true;
-  try {
-    const res = await getProductList(queryParams);
-    tableData.value = res.data.list;
-    total.value = res.data.total;
-  } catch (error) {
-    console.error(error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// 搜索 / 重置 (每次搜索都要重置)
-const handleSearch = () => {
-  queryParams.page = 1;
-  loadData();
-};
+const {
+  loading,
+  tableData,
+  total,
+  queryParams,
+  loadData,
+  handleSearch,
+  handlePageChange,
+} = useTable(getProductList);
 
 // 2. 弹窗控制 (新增和编辑)
 const dialogVisible = ref(false);
