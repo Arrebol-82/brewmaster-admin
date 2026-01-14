@@ -175,7 +175,7 @@ const loadData = async () => {
     tableData.value = res.data.list; // 一页显示多少杯咖啡
     total.value = res.data.total; // 总数
   } catch (error) {
-    console.log(error);
+    console.error(error);
   } finally {
     loading.value = false;
   }

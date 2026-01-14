@@ -84,14 +84,13 @@ router.beforeEach(async (to, from, next) => {
       // 放行去其他页面
       if (!authStore.user) {
         try {
-          console.log("🔄 页面刷新，正在重新获取用户信息...");
           await authStore.fetchUser(); // 补发请求,恢复数据
           // ❌ 重点!!!!：这里千万不要写 next()！！！
           // ❌ 删掉这里的 next()，让代码继续往下走去检查权限!!!
           //  Vue Router 的机制是：一次路由导航（Navigation），只能接受一次状态变更。
         } catch (error) {
           // 如果 Token 过期了或获取失败
-          console.log("❌ 用户信息获取失败:", error);
+          console.error("❌ 用户信息获取失败:", error);
           ElMessage.error("身份已过期，请重新登录");
           authStore.logout();
           next("/login");

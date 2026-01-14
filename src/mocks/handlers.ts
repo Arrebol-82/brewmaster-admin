@@ -27,7 +27,6 @@ export const handlers = [
     // request 返回的响应体 , 是一个 Request 对象
     const body = (await request.json()) as any;
     // 直接拿是拿不到的  , 所以要用到 request.json()
-    console.log(body);
 
     if (body.username === "admin") {
       //模拟返回一个成功的Token
@@ -64,7 +63,6 @@ export const handlers = [
   // 2. 拦截GET /api/me 请求 (获取用户信息)
   http.get("/api/me", ({ request }) => {
     const token = request.headers.get("Authorization");
-    console.log(token);
     // 如果没有 Token ， 返回 401 未授权
     if (!token) {
       return new HttpResponse(null, { status: 401 }); // 401 未授权 这段代码会让index.ts 触发 catch
@@ -169,7 +167,6 @@ export const handlers = [
     // 获取前端传过来的 JSON 数据
     // 注意：request.json() 返回的是 Promise
     const newProduct = (await request.json()) as any;
-    console.log("开开我", newProduct);
 
     // 模拟后端生成 id 和 创建时间
     const productObj: Product = {
