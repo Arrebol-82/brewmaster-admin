@@ -135,7 +135,8 @@ export const handlers = [
     // 如果搜索关键词不为空 , 则过滤掉不符合关键词的商品
     if (keyword) {
       filteredList = filteredList.filter((item) => item.name.includes(keyword));
-    } else if (status) {
+    }
+    if (status) {
       // 过滤
       filteredList = filteredList.filter((item) => item.status === status);
     }
@@ -247,7 +248,9 @@ export const handlers = [
     // 模糊关键词搜索
     if (keyword) {
       resultList = resultList.filter((item) => item.orderNo.includes(keyword));
-    } else if (status) {
+    }
+
+    if (status) {
       // 过滤
       resultList = resultList.filter((item) => item.status === status);
     }

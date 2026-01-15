@@ -190,8 +190,6 @@ const handleDelete = async (row: Product) => {
   } catch (error) {
     console.error(error);
     // 取消删除
-  } finally {
-    dialogVisible.value = false;
   }
 };
 
