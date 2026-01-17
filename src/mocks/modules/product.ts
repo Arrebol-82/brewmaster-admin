@@ -9,7 +9,7 @@ let dbProducts: Product[] = Array.from({ length: 25 }).map((_, index) => ({
   price: 2800 + index * 100, // 2800分 = 28元
   status: index % 3 === 0 ? "on_sale" : "sold_out", // 0 是上架 , 1 是下架
   stock: 10 + index, // 库存
-  createTime: "2026-01-08",
+  createTime: new Date(Date.now() - index * 864000000).toLocaleString(),
 }));
 
 export const productHandlers = [
