@@ -44,6 +44,11 @@ const routes: Array<RouteRecordRaw> = [
         // 都能访问订单管理
         meta: { title: "订单管理", roles: ["admin", "staff"] },
       },
+      {
+        path: "orders/:id",
+        name: "OrderDetail",
+        component: () => import("@/views/orders/OrderDetail.vue"),
+      },
     ],
   },
 
