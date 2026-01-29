@@ -15,8 +15,8 @@
     /* Linting */
     // strict 为true的话就表示开启了 所有严格类型检查选项。
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false, // 允许存在未使用的局部变量
+    "noUnusedParameters": false, // 允许存在未使用的局部变量
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,

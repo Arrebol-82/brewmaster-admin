@@ -8,15 +8,33 @@ import router from "./router";
 import "./style.css";
 import App from "./App.vue";
 
+// async function enableMocking() {
+//   // 这里的 import.meta.env.DEV 是 Vite 提供的环境变量
+//   if (import.meta.env.DEV) {
+//     // 动态引入: 只有在开发时才会加载这个文件, 打包上线时不会把 mock 代码打包进去
+//     const { worker } = await import("./mocks/browser");
+//     // 启动 Service Worker
+//     // worker.start()就是启动拦截器;
+//     // onUnandledRequset: 'bypass' 意思是: 如果遇到没定义的接口,就直接放行 (不报错),让他走正常的请求流程
+//     return worker.start({ onUnhandledRequest: "bypass" });
+//   }
+// }
+
 async function enableMocking() {
-  // 这里的 import.meta.env.DEV 是 Vite 提供的环境变量
-  if (import.meta.env.DEV) {
-    // 动态引入: 只有在开发时才会加载这个文件, 打包上线时不会把 mock 代码打包进去
+  // 💡 修改判断条件：开发环境 OR 生产环境的特定域名
+  // 这样打包后，在你的服务器上也能跑
+  if (import.meta.env.DEV || window.location.hostname === 'rexcode.xyz') {
+    
     const { worker } = await import("./mocks/browser");
-    // 启动 Service Worker
-    // worker.start()就是启动拦截器;
-    // onUnandledRequset: 'bypass' 意思是: 如果遇到没定义的接口,就直接放行 (不报错),让他走正常的请求流程
-    return worker.start({ onUnhandledRequest: "bypass" });
+
+    // 重点：一定要返回这个 start 状态
+    return worker.start({ 
+      onUnhandledRequest: "bypass",
+      serviceWorker: {
+        // 如果你的项目部署在根目录，就这样写；如果在子目录，要加路径
+        url: '/mockServiceWorker.js' 
+      }
+    });
   }
 }
 

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getOrderDetail } from "@/api/orders";
-import type { OrderDetail } from "@/types/order";
-import { ElMessage } from "element-plus";
+import { getOrderDetail , updateOrderStatus} from "@/api/orders";
+import type { OrderDetail , OrderStaus } from "@/types/order";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { ORDER_STATUS_MAP } from "@/constants/order";
 
 const route = useRoute();
 // route是拿到路由参数的对象
@@ -34,18 +35,39 @@ const loadData = async () => {
   }
 };
 
-const orderStatusMap: Record<string, { type: string; label: string }> = {
-  pending: { type: "warning", label: "待支付" },
-  paid: { type: "success", label: "已支付" },
-  shipped: { type: "info", label: "已发货" },
-  completed: { type: "info", label: "已完成" },
-  cancelled: { type: "danger", label: "已取消" },
-};
 
 // 这样的好处就是不用每次调用函数都创建一次 orderStatusMap对象
-const getStatusConfig = (status: string) => {
-  return orderStatusMap[status] || { type: "info", label: "未知状态" };
+const getStatusConfig = (status: OrderStaus) => {
+  return ORDER_STATUS_MAP[status] || { type: "info", label: "未知状态" };
 };
+
+// 更新订单状态
+const handleStatusChange = async (newStatus: OrderStaus) => {
+  if (!order.value) return;
+
+  // 二次确认
+  const confirmMap: Record<string, string> = {
+    paid: "确认用户已经付款了吗?",
+    shipped: "确认商品已经发货了吗?",
+    completed: "确认订单已经完成了吗?",
+    cancelled: "确认订单已经取消了吗? 此操作不可恢复!",
+  }
+
+  try {
+    await ElMessageBox.confirm(confirmMap[newStatus] || '确认执行操作?', '提示', {
+      type: newStatus === 'cancelled' ? 'warning' : 'info',
+    })
+
+    if (!order.value?.id) return;
+    await updateOrderStatus(order.value.id, newStatus)
+    ElMessage.success('操作成功')
+
+    loadData()
+
+  } catch (error) { 
+    if (error !== 'cancel') console.log(error)
+  }
+}
 
 onMounted(() => {
   loadData();
@@ -54,74 +76,67 @@ onMounted(() => {
 
 <template>
   <div class="app-container" v-loading="loading">
-    <!-- 顶部导航 -->
-    <el-page-header @back="router.back()" title="返回列表"> 
+    
+    <el-page-header @back="router.back()">
       <template #content>
-        <span class="text-large font-600 mr-3">订单详情</span>
-        <!-- 判断是否有订单 -->
-        <span v-if="order" style="margin-left: 10px; font-size: 14px; color: #909399;">
-          {{ order.order }}
-        </span>
+        <span class="text-large font-600 mr-3"> 订单详情：{{ order?.order }} </span>
       </template>
 
-      <!-- 右侧操作区  -->
       <template #extra>
-        <el-tag v-if="order" :type="getStatusConfig(order.status).type" size="large">
+        <div class="header-actions" style="display: flex; align-items: center;">
+          
+          <el-tag 
+            v-if="order" 
+            :type="getStatusConfig(order.status).type" 
+            size="large" 
+            effect="dark"
+            style="margin-right: 15px;"
+          >
             {{ getStatusConfig(order.status).label }}
-        </el-tag>
+          </el-tag>
+
+          <div v-if="order" class="action-buttons">
+            <el-button v-if="order.status === 'pending'" type="primary" plain @click="handleStatusChange('paid')">模拟支付</el-button>
+            <el-button v-if="order.status === 'paid'" type="success" plain @click="handleStatusChange('shipped')">发货</el-button>
+            <el-button v-if="order.status === 'shipped'" type="warning" plain @click="handleStatusChange('completed')">确认送达</el-button>
+            <el-button v-if="!['completed', 'cancelled'].includes(order.status)" type="danger" plain style="margin-left: 10px;" @click="handleStatusChange('cancelled')">取消订单</el-button>
+          </div>
+        </div>
       </template>
     </el-page-header>
 
-    <el-divider />
+    <div style="margin: 20px 0;">
+      </div>
 
-    <div v-if="order">
-      <!-- 核心信息区 -->
-       <el-descriptions title="基础信息" :column="3" border>
-          <el-descriptions-item label="订单号">{{ order.order }}</el-descriptions-item>
-          <el-descriptions-item label="下单时间">{{ order.createTime }}</el-descriptions-item> 
-          <el-descriptions-item label="支付金额">
-            <span style="color: #f56c6c; font-weight: bold;">
-              ¥ {{ (order.totalAmount / 100 ).toFixed(2) }} 
-            </span>
-          </el-descriptions-item>
-          <el-descriptions-item label="买家ID">{{ order.id }} (模拟)</el-descriptions-item>
-          <el-descriptions-item label="支付方式">微信支付</el-descriptions-item> 
-          <el-descriptions-item label="备注">无</el-descriptions-item>
-       </el-descriptions>
+    <div class="section-title">操作日志</div>
+    
+    <div class="log-scroll-container">
+      <div class="log-area">
+        <el-empty 
+          v-if="!order?.logs || order.logs.length === 0" 
+          description="暂无操作记录" 
+          :image-size="60" 
+        />
 
-          <!-- 🔵 3. 商品清单 (Table) -->
-      <div class="section-title">商品清单</div>
-      <el-table :data="order.items" border style="width: 100%">
-        <el-table-column prop="name" label="商品名称" />
-        <el-table-column label="单价" width="120">
-          <template #default="{ row }">¥ {{ (row.price / 100).toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column prop="count" label="数量" width="100" align="center" />
-        <el-table-column label="小计" width="120" align="right">
-          <template #default="{ row }">
-            ¥ {{ ((row.price * row.count) / 100).toFixed(2) }}
-          </template>
-        </el-table-column>
-      </el-table>
 
-            <!-- 🟣 4. 状态日志 (Timeline) -->
-      <div class="section-title">操作日志</div>
-       <div class="log-area">
-        <el-timeline>
+        <el-timeline v-else>
+           <!-- :hollow="index === order.logs.length - 1" 如果是最会一个数据 , 那么就是实心的 -->
           <el-timeline-item
             v-for="(log, index) in order.logs"
-            :key="index"
+            :key="log.id"
             :timestamp="log.createTime"
-            :type="index === order.logs.length - 1 ? 'primary' : ''" 
+            :type="index === order.logs.length - 1 ? 'primary' : ''"
+            :hollow="index === order.logs.length - 1"
           >
-            <h4>{{ log.action }}</h4>
-            <p>操作人: {{ log.operator }}</p>
+            <h4 style="margin: 0 0 5px 0;">{{ log.action }}</h4>
+            <p style="margin: 0; color: #909399; font-size: 13px;">
+              操作人: {{ log.operator }}
+            </p>
           </el-timeline-item>
         </el-timeline>
       </div>
     </div>
-       <!-- 空状态 (防止 id 不存在) -->
-    <el-empty v-else-if="!loading" description="未找到订单信息" />
+
   </div>
 </template>
 
@@ -134,16 +149,24 @@ onMounted(() => {
   background-color: #fff;
   min-height: 80vh;
 }
-.section-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 25px 0 15px;
-  padding-left: 10px;
-  border-left: 4px solid #409eff;
-}
+
 .log-area {
   padding: 20px;
   background-color: #f5f7fa;
   border-radius: 4px;
 }
+
+.section-title {
+  margin: 20px 0;
+  font-weight: bold;
+  border-left: 4px solid #409eff;
+  padding-left: 10px;
+}
+
+/* 💡 滚动条的核心样式 */
+.log-scroll-container {
+  max-height: auto;      /* 固定高度，超过这个高度就出滚动条 */
+  overflow-y: auto;       /* 纵向溢出自动显示滚动条 */
+  border: 1px solid #ebeef5;
+  }
 </style>

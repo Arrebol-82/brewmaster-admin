@@ -129,15 +129,19 @@ export const orderHandlers = [
       return HttpResponse.json({ code: 404, message: "订单不存在" });
     }
 
-    // 核心业务逻辑: 该状态 + 加日志
-    const oldStatus = order.status;
-    order.status = body.status;
-    order.logs.push({
-      id: Date.now(),
-      action: `状态更新: ${oldStatus} -> ${body.status}`,
-      operator: "Admin", // 暂时先写死 , 以后可以从 Token 中解析
-      createTime: new Date().toLocaleString(),
-    });
+    if (order) {
+      // 核心业务逻辑: 该状态 + 加日志
+      const oldStatus = order.status;
+      order.status = body.status;
+      order.logs.push({
+        id: Date.now(),
+        action: `状态更新: ${oldStatus} -> ${body.status}`,
+        operator: "Admin", // 暂时先写死 , 以后可以从 Token 中解析
+        createTime: new Date().toLocaleString(),
+      });
+    }
+
+
 
     return HttpResponse.json({
       code: 200,

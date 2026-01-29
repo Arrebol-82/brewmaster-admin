@@ -79,8 +79,8 @@
         <!-- 状态列：使用 Tag 美化 -->
         <el-table-column label="状态" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusMap[row.status]?.type" effect="plain">
-              {{ statusMap[row.status]?.label || "未知状态" }}
+            <el-tag :type="statusMap(row.status).type" effect="plain">
+              {{ statusMap(row.status).label || "未知状态" }}
             </el-tag>
           </template>
         </el-table-column>
@@ -126,6 +126,8 @@ import { useRouter } from "vue-router";
 import { Search, Refresh, View } from "@element-plus/icons-vue";
 // ✅ 核心 1: 引入 API 和 Hook
 import { getOrderList } from "@/api/orders";
+import type { OrderStaus } from "@/types/order";
+import { ORDER_STATUS_MAP } from "@/constants/order";
 import { useTable } from "@/composables/useTable";
 
 const router = useRouter();
@@ -151,17 +153,13 @@ const statusOptions = [
   { label: "已取消", value: "cancelled" },
 ];
 
+
 // 状态显示逻辑 (Tag颜色)
-const statusMap: Record<
-  string,
-  { type: "success" | "info" | "warning" | "danger" | ""; label: string }
-> = {
-  pending: { type: "warning", label: "待支付" },
-  paid: { type: "success", label: "已支付" },
-  shipped: { type: "info", label: "已发货" },
-  completed: { type: "info", label: "已完成" },
-  cancelled: { type: "danger", label: "已取消" },
+const statusMap = (status: OrderStaus) => {
+  return ORDER_STATUS_MAP[status] || { type: "info", label: "未知状态" };
 };
+
+
 // 重置按钮逻辑 (复用 ProductList 的思路)
 const handleReset = () => {
   queryParams.keyword = "";
