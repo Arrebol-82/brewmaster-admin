@@ -5,6 +5,8 @@ import { getOrderDetail , updateOrderStatus} from "@/api/orders";
 import type { OrderDetail , OrderStaus } from "@/types/order";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ORDER_STATUS_MAP } from "@/constants/order";
+import { useAuthStore  } from "@/stores/auth";
+
 
 const route = useRoute();
 // route是拿到路由参数的对象
@@ -13,6 +15,8 @@ const router = useRouter();
 
 const loading = ref(false);
 const order = ref<OrderDetail | null>(null);
+
+const authStore = useAuthStore();
 
 // 1. 获取路由参数中的 ID
 const orderId = Number(route.params.id);
@@ -24,7 +28,6 @@ const loadData = async () => {
   loading.value = true;
   try {
     const res = await getOrderDetail(orderId);
-    console.log(res);
 // console.log('订单项数量：', res.data.items.length);
     order.value = (res as any).data;
   } catch (error) {
@@ -65,7 +68,7 @@ const handleStatusChange = async (newStatus: OrderStaus) => {
     loadData()
 
   } catch (error) { 
-    if (error !== 'cancel') console.log(error)
+    if (error !== 'cancel') console.error(error)
   }
 }
 
@@ -99,7 +102,7 @@ onMounted(() => {
             <el-button v-if="order.status === 'pending'" type="primary" plain @click="handleStatusChange('paid')">模拟支付</el-button>
             <el-button v-if="order.status === 'paid'" type="success" plain @click="handleStatusChange('shipped')">发货</el-button>
             <el-button v-if="order.status === 'shipped'" type="warning" plain @click="handleStatusChange('completed')">确认送达</el-button>
-            <el-button v-if="!['completed', 'cancelled'].includes(order.status)" type="danger" plain style="margin-left: 10px;" @click="handleStatusChange('cancelled')">取消订单</el-button>
+            <el-button v-if="!['completed', 'cancelled'].includes(order.status) && authStore.isAdmin" type="danger" @click="handleStatusChange('cancelled')">取消订单</el-button>
           </div>
         </div>
       </template>

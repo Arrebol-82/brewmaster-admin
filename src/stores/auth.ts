@@ -16,6 +16,9 @@ export const useAuthStore = defineStore("auth", () => {
   // 获取权限
   const permissions = computed(() => user.value?.permissions ?? []);
 
+  // 判断进来的人是不是管理员
+  const isAdmin = computed(() => roles.value.includes("admin"));
+
   const hasRole = (role: Role) => roles.value.includes(role);
 
   const hasPerm = (code: string) => permissions.value.includes(code);
@@ -59,12 +62,14 @@ export const useAuthStore = defineStore("auth", () => {
     if (!token.value) return "没拿到";
     return token.value.split("-")[0];
   });
+  
   return {
     roles,
     token,
     user,
     permissions,
     userRole,
+    isAdmin,
     hasPerm,
     hasRole,
     login,

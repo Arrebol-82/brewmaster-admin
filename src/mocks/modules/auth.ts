@@ -82,7 +82,7 @@ export const authHandlers = [
           // 身份
           roles: ["staff"],
           // 权限
-          permissions: ["product:read"],
+          permissions: ["product:create" , 'order:read'], 
           //只能查看商品
         },
       });
